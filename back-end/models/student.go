@@ -44,6 +44,7 @@ type Student struct {
 	Id      int8      `orm:"column(id)"        json:"id"`
 	Class   string    `orm:"column(class)"     json:"class"`
 	Name    string    `orm:"column(name)"      json:"name"`
+	Avatar  string    `orm:"column(name)       json:"avatar""`
 	Sex     string    `orm:"column(sex)"       json:"sex"`
 	Age     int8      `orm:"column(age)"       json:"age"`
 	Phone   string    `orm:"column(phone)"     json:"phone"`
@@ -114,4 +115,15 @@ func (this *StudentServiceProvider) GetAll(classes string) ([]Student,error) {
 	}
 
 	return student, nil
+}
+
+func (this *StudentServiceProvider) GetOne(name,class string) (*Student, error) {
+	var student Student
+	o := orm.NewOrm()
+	_, err := o.Raw("SELECT * FROM design.student WHERE name=? AND class=?", name, class).QueryRows(&student)
+	if err != nil {
+		return nil, err
+	}
+
+	return &student, nil
 }

@@ -122,3 +122,27 @@ func (this *StudentController) GetAll() {
 
 	this.ServeJSON()
 }
+
+func (this *StudentController) GetOne() {
+	var (
+		student struct {
+			Name string `json:"name"`
+			Class string `json:"class"`
+		}
+	)
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &student)
+	if err != nil {
+		logger.Logger.Error("change student info Unmarshal:", err)
+		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+	} else {
+		student, err := models.StudentServer.GetOne(student.Name, student.Class)
+		if err != nil {
+			logger.Logger.Error("change student info", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		} else {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: student}
+		}
+	}
+
+	this.ServeJSON()
+}

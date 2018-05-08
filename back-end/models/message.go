@@ -24,39 +24,36 @@
 
 /*
  * Revision History:
- *     Initial: 2018/05/06        Tong Yuehong
+ *     Initial: 2018/05/07        Tong Yuehong
  */
 
 package models
 
 import (
 	"github.com/astaxie/beego/orm"
-
 	"github.com/tongyuehong1/design-back-end/back-end/common"
 )
 
 func init() {
-	orm.RegisterModel(new(Teacher))
+	orm.RegisterModel(new(Message))
 }
 
-type Teacher struct {
-	Id    int8   `orm:"id"    json:"id"`
-	Name  string `orm:"name"  json:"name"`
-	Class string `orm:"class" json:"class"`
-	Sex   string `orm:"sex"   json:"sex"`
-	Phone string `orm:"phone" json:"phone"`
-	Age   int8   `orm:"age"   json:"age"`
+type Message struct {
+	Id      int8   `orm:"column(id)"        json:"id"`
+	Title   string `orm:"column(title)"     json:"title"`
+	Content string `orm:"column(content)"   json:"content"`
+	Status  string `orm:"column(status)"    json:"status"`
 }
 
-type TeacherServiceProvider struct {
+type MessageServiceProvider struct {
 }
 
-var TeacherServer *TeacherServiceProvider
+var MessageServer *MessageServiceProvider
 
-func (this *TeacherServiceProvider) AddTeacher(teacher Teacher) error {
+func (this *MessageServiceProvider) Publish(message Message) error {
 	o := orm.NewOrm()
-	sql := "INSERT INTO design.teacher(name,class,sex,phone,age) VALUES(?,?,?,?,?)"
-	values := []interface{}{teacher.Name,teacher.Class,teacher.Sex,teacher.Phone,teacher.Age}
+	sql := "INSERT INTO design.message(title,content,status) VALUES(?,?,?,?,?,?,?)"
+	values := []interface{}{message.Title, message.Content, common.DefStatus}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
 	if err != nil {
@@ -65,27 +62,14 @@ func (this *TeacherServiceProvider) AddTeacher(teacher Teacher) error {
 	return nil
 }
 
-func (this *TeacherServiceProvider) ChangeTeacher(teacher Teacher) error {
+func (this *MessageServiceProvider) Delete(id int8) error {
 	o := orm.NewOrm()
-	sql := "UPDATE design.student SET design.teacher(name,class,sex,phone,age) WHERE id=?LIMIT 1"
-	values := []interface{}{teacher.Name,teacher.Class,teacher.Sex,teacher.Phone,teacher.Age}
+	sql := "DELETE * FROM design.message WHERE id=? AND status=? LIMIT 1"
+	values := []interface{}{id, common.DefStatus}
 	raw := o.Raw(sql, values)
-	result, err := raw.Exec()
-	if err == nil {
-		if row, _ := result.RowsAffected(); row == 0 {
-			return common.ErrNotFound
-		}
-	}
-	return err
-}
-
-func (this *TeacherServiceProvider) GetOne(class string) (*Teacher, error) {
-	var teacher Teacher
-	o := orm.NewOrm()
-	_, err := o.Raw("SELECT * FROM design.teacher WHERE class= ?", class).QueryRows(&teacher)
+	_, err := raw.Exec()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return &teacher, nil
+	return nil
 }

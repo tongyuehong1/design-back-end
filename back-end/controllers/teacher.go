@@ -80,3 +80,22 @@ func (this *TeacherController) ChangeTech() {
 
 	this.ServeJSON()
 }
+
+func (this *StudentController) GetTeacher() {
+	var class string
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
+	if err != nil {
+		logger.Logger.Error("change student info Unmarshal:", err)
+		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+	} else {
+		student, err := models.TeacherServer.GetOne(class)
+		if err != nil {
+			logger.Logger.Error("change student info", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		} else {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: student}
+		}
+	}
+
+	this.ServeJSON()
+}

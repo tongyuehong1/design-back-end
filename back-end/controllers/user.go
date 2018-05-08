@@ -64,11 +64,13 @@ func (this *UserController) Register() {
 }
 
 func (this *UserController) Login() {
-	var login struct {
-		Name  string `json:"name"`
-		Class string `json:"class"`
-		Pass  string `json:"pass"`
-	}
+	var (
+		login struct {
+			Name  string `json:"name"`
+			Class string `json:"class"`
+			Pass  string `json:"pass"`
+		}
+	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &login)
 	if err != nil {
 		logger.Logger.Error("register Unmarshal:", err)
@@ -90,7 +92,7 @@ func (this *UserController) Login() {
 
 				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrWrongPass}
 			} else {
-				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: class}
 			}
 		}
 	}
