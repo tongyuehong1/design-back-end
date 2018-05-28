@@ -31,11 +31,12 @@ package init
 
 import (
 	"github.com/astaxie/beego/orm"
+	_ "github.com/go-sql-driver/mysql"
 	. "github.com/tongyuehong1/design-back-end/back-end/common"
 )
 
 func InitSql() {
 	orm.RegisterDriver("mysql", orm.DRMySQL)
-	orm.RegisterDataBase("default", "mysql", "root:111111@tcp(127.0.0.1:3306)/student?charset=utf8")
-	orm.RegisterDataBase(DBStudent, "mysql", "root:111111@tcp(127.0.0.1:3306)/student?charset=utf8")
+	orm.RegisterDataBase("default", "mysql", "root:111111@tcp(127.0.0.1:3306)/design?charset=utf8")
+	orm.RegisterDataBase(DBdesign, "mysql", "root:111111@tcp(127.0.0.1:3306)/design?charset=utf8")
 }

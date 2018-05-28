@@ -29,10 +29,10 @@
 package logger
 
 import (
-"fmt"
-"log"
+	"fmt"
+	"log"
 
-"go.uber.org/zap"
+	"go.uber.org/zap"
 )
 
 type RecordLog struct{}

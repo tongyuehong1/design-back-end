@@ -1,28 +1,4 @@
 /*
- * MIT License
- *
- * Copyright (c) 2018 SmartestEE Co., Ltd..
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
-/*
  * Revision History:
  *     Initial: 2018/05/05        Tong Yuehong
  */
@@ -31,26 +7,35 @@ package controllers
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/astaxie/beego"
 
-	"github.com/tongyuehong1/design-back-end/back-end/models"
-	"github.com/tongyuehong1/golang-project/libs/logger"
 	"github.com/tongyuehong1/design-back-end/back-end/common"
+	"github.com/tongyuehong1/design-back-end/back-end/models"
+	"github.com/tongyuehong1/design-back-end/back-end/utility"
+	"github.com/tongyuehong1/golang-project/libs/logger"
 )
 
+// StudentController -
 type StudentController struct {
 	beego.Controller
 }
 
+// Insert -
 func (this *StudentController) Insert() {
 	student := models.Student{}
-	err := json.Unmarshal(this.Ctx.Input.RequestBody, &student)
+
+	var info struct {
+		UserID uint32 `json:"userid"`
+	}
+
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
 	if err != nil {
 		logger.Logger.Error("add student Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		err := models.StudentServer.Insert(student)
+		err = models.StudentServer.Insert(student)
 		if err != nil {
 			logger.Logger.Error("Insert student", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
@@ -62,8 +47,9 @@ func (this *StudentController) Insert() {
 	this.ServeJSON()
 }
 
+// Modify -
 func (this *StudentController) Modify() {
-	info := models.Student{}
+	var info = models.Info{}
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
 	if err != nil {
 		logger.Logger.Error("change student info Unmarshal:", err)
@@ -81,16 +67,19 @@ func (this *StudentController) Modify() {
 	this.ServeJSON()
 }
 
+// GetLeaders -
 func (this *StudentController) GetLeaders() {
 	var (
-		class string
+		class struct {
+			Class string `json:"class"`
+		}
 	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
 	if err != nil {
 		logger.Logger.Error("change student info Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		students, err := models.StudentServer.GetLeaders(class)
+		students, err := models.StudentServer.GetLeaders(class.Class)
 		if err != nil {
 			logger.Logger.Error("change student info", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
@@ -102,16 +91,19 @@ func (this *StudentController) GetLeaders() {
 	this.ServeJSON()
 }
 
+// GetAll -
 func (this *StudentController) GetAll() {
 	var (
-		class string
+		class struct {
+			Class string `json:"class"`
+		}
 	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
 	if err != nil {
 		logger.Logger.Error("change student info Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		students, err := models.StudentServer.GetAll(class)
+		students, err := models.StudentServer.GetAll(class.Class)
 		if err != nil {
 			logger.Logger.Error("change student info", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
@@ -123,10 +115,11 @@ func (this *StudentController) GetAll() {
 	this.ServeJSON()
 }
 
+// GetOne -
 func (this *StudentController) GetOne() {
 	var (
 		student struct {
-			Name string `json:"name"`
+			Name  string `json:"name"`
 			Class string `json:"class"`
 		}
 	)
@@ -141,6 +134,37 @@ func (this *StudentController) GetOne() {
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
 		} else {
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: student}
+		}
+	}
+
+	this.ServeJSON()
+}
+
+// UpAvatar -
+func (this *StudentController) UpAvatar() {
+	var (
+		avatar struct {
+			StuID  uint32 `json:"stuid"`
+			Avatar string `json:"avatar"`
+		}
+	)
+
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &avatar)
+	if err != nil {
+		logger.Logger.Error("avatar Unmarshal:", err)
+	} else {
+		path, err := utility.SaveAvatar(avatar.StuID, avatar.Avatar)
+		if err != nil {
+			logger.Logger.Error("save avatar", err)
+		}
+		ip := "http://192.168.0.103:8080"
+		path = strings.Replace(path, ".", ip, 1)
+		err = models.StudentServer.UpAvatar(avatar.StuID, path)
+		if err != nil {
+			logger.Logger.Error("models", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlNotFound}
+		} else {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 		}
 	}
 

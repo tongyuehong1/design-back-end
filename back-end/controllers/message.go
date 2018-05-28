@@ -1,6 +1,6 @@
 /*
  * Revision History:
- *     Initial: 2018/05/06        Tong Yuehong
+ *     Initial: 2018/05/13        Tong Yuehong
  */
 
 package controllers
@@ -15,22 +15,22 @@ import (
 	"github.com/tongyuehong1/golang-project/libs/logger"
 )
 
-// TeacherController -
-type TeacherController struct {
+// MessageController -
+type MessageController struct {
 	beego.Controller
 }
 
-// AddTeacher -
-func (this *TeacherController) AddTeacher() {
-	teacher := models.Teacher{}
-	err := json.Unmarshal(this.Ctx.Input.RequestBody, &teacher)
+// Publish -
+func (this *MessageController) Publish() {
+	message := models.Message{}
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &message)
 	if err != nil {
-		logger.Logger.Error("add teacher Unmarshal:", err)
+		logger.Logger.Error("add student Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		err := models.TeacherServer.AddTeacher(teacher)
+		err := models.MessageServer.Publish(message)
 		if err != nil {
-			logger.Logger.Error("Add teacher", err)
+			logger.Logger.Error("Insert message", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
 		} else {
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
@@ -40,17 +40,20 @@ func (this *TeacherController) AddTeacher() {
 	this.ServeJSON()
 }
 
-// ChangeTech -
-func (this *TeacherController) ChangeTech() {
-	teacher := models.Teacher{}
-	err := json.Unmarshal(this.Ctx.Input.RequestBody, &teacher)
+// Delete -
+func (this *MessageController) Delete() {
+	var id struct {
+		ID int8 `json:"id"`
+	}
+
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &id)
 	if err != nil {
-		logger.Logger.Error("change teacher's info Unmarshal:", err)
+		logger.Logger.Error("add student Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		err := models.TeacherServer.ChangeTeacher(teacher)
+		err := models.MessageServer.Delete(id.ID)
 		if err != nil {
-			logger.Logger.Error("change teacher info", err)
+			logger.Logger.Error("Insert student", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
 		} else {
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
@@ -60,22 +63,23 @@ func (this *TeacherController) ChangeTech() {
 	this.ServeJSON()
 }
 
-// GetTeacher -
-func (this *TeacherController) GetTeacher() {
+// Show -
+func (this *MessageController) Show() {
 	var class struct {
 		Class string `json:"class"`
 	}
+
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
 	if err != nil {
-		logger.Logger.Error("change student info Unmarshal:", err)
+		logger.Logger.Error("show message Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		student, err := models.TeacherServer.GetOne(class.Class)
+		message, err := models.MessageServer.Show(class.Class)
 		if err != nil {
-			logger.Logger.Error("change student info", err)
+			logger.Logger.Error("Show message", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
 		} else {
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: student}
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: message}
 		}
 	}
 
