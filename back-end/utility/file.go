@@ -9,31 +9,34 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/fengyfei/gu/libs/logger"
 )
 
 const (
 	avatar    = "./avatar"
-	suffix = "jpg"
+	avasuffix = "jpg"
+	File = "./file"
+	Filesuffix = "xlsx"
 )
 
-func fileName(userID uint32) string {
-	timestamp := time.Now().Unix()
+func fileName(userID uint32, diff int) string {
+	//timestamp := time.Now().Unix()
 
-	time := time.Unix(timestamp, 0).Format("2006-01-02 03:04:05 PM")
-	time = strings.Replace(time, " ", "", 2)
-
+	//time := time.Unix(timestamp, 0).Format("2006-01-02 03:04:05 PM")
+	//time = strings.Replace(time, " ", "", 2)
 	id := strconv.FormatUint(uint64(userID), 10)
 
-	return avatar + time + id + "." + suffix
+	if diff == 0 {
+		return avatar + id + "." + avasuffix
+	}
+
+	return file + id + "." + filesuffix
 }
 
-// SaveAvatar -
-func SaveAvatar(userID uint32, image string) (string, error) {
-	fileName := fileName(userID)
+// SaveFile -
+func SaveAvatar(userID uint32, image string, diff int) (string, error) {
+	fileName := fileName(userID, diff)
 
 	img, _ := base64.StdEncoding.DecodeString(image)
 	err := ioutil.WriteFile(fileName, []byte(img), 0777)

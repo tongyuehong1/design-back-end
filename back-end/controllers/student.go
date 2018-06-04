@@ -8,8 +8,10 @@ package controllers
 import (
 	"encoding/json"
 	"strings"
+	"fmt"
 
 	"github.com/astaxie/beego"
+	"github.com/360EntSecGroup-Skylar/excelize"
 
 	"github.com/tongyuehong1/design-back-end/back-end/common"
 	"github.com/tongyuehong1/design-back-end/back-end/models"
@@ -22,27 +24,44 @@ type StudentController struct {
 	beego.Controller
 }
 
+type User struct {
+	Id uint32 `json:"id"`
+}
 // Insert -
 func (this *StudentController) Insert() {
-	student := models.Student{}
-
-	var info struct {
-		UserID uint32 `json:"userid"`
+	var (
+		stu models.Student
+		user User
+	)
+	filename := utility.File + string(user.Id) + "." + utility.Filesuffix
+	xlsx, err := excelize.OpenFile(filename)
+	if err != nil {
+		logger.Logger.Error("open excel error: ", err)
 	}
 
-	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
-	if err != nil {
-		logger.Logger.Error("add student Unmarshal:", err)
-		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
-	} else {
-		err = models.StudentServer.Insert(student)
+	rows := xlsx.GetRows("Sheet1")
+	for i, row := range rows {
+		if i != 0 {
+			stu.Name = row[0]
+			stu.Class = row[1]
+			stu.StudentID = row[2]
+			stu.Sex = row[3]
+			stu.Age = row[4]
+			stu.Phone = row[5]
+			stu.Duty = row[6]
+			stu.Isonly = row[7]
+			stu.Address = row[8]
+			fmt.Println(stu)
+		}
+		fmt.Println(stu)
+		err = models.StudentServer.Insert(stu)
 		if err != nil {
-			logger.Logger.Error("Insert student", err)
+			logger.Logger.Error("insert student error:", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
-		} else {
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 		}
 	}
+
+	this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 
 	this.ServeJSON()
 }
@@ -95,7 +114,7 @@ func (this *StudentController) GetLeaders() {
 func (this *StudentController) GetAll() {
 	var (
 		class struct {
-			Class string `json:"class"`
+			Class string `json:"className"`
 		}
 	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
@@ -103,6 +122,7 @@ func (this *StudentController) GetAll() {
 		logger.Logger.Error("change student info Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
+		fmt.Println("sssss", class.Class)
 		students, err := models.StudentServer.GetAll(class.Class)
 		if err != nil {
 			logger.Logger.Error("change student info", err)
@@ -153,7 +173,7 @@ func (this *StudentController) UpAvatar() {
 	if err != nil {
 		logger.Logger.Error("avatar Unmarshal:", err)
 	} else {
-		path, err := utility.SaveAvatar(avatar.StuID, avatar.Avatar)
+		path, err := utility.SaveAvatar(avatar.StuID, avatar.Avatar, 0)
 		if err != nil {
 			logger.Logger.Error("save avatar", err)
 		}

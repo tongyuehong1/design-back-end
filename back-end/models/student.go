@@ -10,6 +10,8 @@ import (
 	"github.com/astaxie/beego/orm"
 
 	"github.com/tongyuehong1/design-back-end/back-end/common"
+	"github.com/360EntSecGroup-Skylar/excelize"
+	"fmt"
 )
 
 func init() {
@@ -17,29 +19,34 @@ func init() {
 }
 
 // Student -
-type Student struct {
-	ID        uint32 `orm:"column(id)"        json:"id"`
-	Class     string `orm:"column(class)"     json:"class"`
-	Name      string `orm:"column(name)"      json:"name"`
-	StudentID string `orm:"column(studentid)" json:"studentid"`
-	Avatar    string `orm:"column(avatar)"      json:"avatar"`
-	Sex       string `orm:"column(sex)"       json:"sex"`
-	Age       string `orm:"column(age)"       json:"age"`
-	Phone     string `orm:"column(phone)"     json:"phone"`
-	Address   string `orm:"column(address)"   json:"address"`
-	Duty      string `orm:"column(duty)"      json:"duty"`
-	Isonly    string `orm:"column(isonly)"    json:"isonly"`
-	Status    int8   `orm:"column(status)"    json:"status"`
-}
-
 type (
+	Student struct {
+		ID        uint32 `orm:"column(id)"        json:"id"`
+		Class     string `orm:"column(class)"     json:"class"`
+		Name      string `orm:"column(name)"      json:"name"`
+		StudentID string `orm:"column(studentid)" json:"studentid"`
+		Avatar    string `orm:"column(avatar)"    json:"avatar"`
+		Sex       string `orm:"column(sex)"       json:"sex"`
+		Age       string `orm:"column(age)"       json:"age"`
+		Phone     string `orm:"column(phone)"     json:"phone"`
+		Address   string `orm:"column(address)"   json:"address"`
+		Duty      string `orm:"column(duty)"      json:"duty"`
+		Isonly    string `orm:"column(isonly)"    json:"isonly"`
+		Status    int8   `orm:"column(status)"    json:"status"`
+	}
 	// Info -
 	Info struct {
-		ID      int32  `json:"id"`
-		Phone   string `json:"phone"`
-		Address string `json:"address"`
-		Duty    string `json:"duty"`
+		ID        uint32 `json:"id"`
+		Name      string `json:"name"`
+		Sex       string `json:"sex"`
+		Class     string `json:"class"`
+		Studentid string `json:"studentid"`
+		Phone     string `json:"phone"`
 	}
+)
+
+const (
+	Avatar = "http://10.0.0.43:8080/avatar/common.png"
 )
 
 // StudentServiceProvider -
@@ -62,8 +69,8 @@ func createTable() {
 // Insert -
 func (sp *StudentServiceProvider) Insert(student Student) error {
 	o := orm.NewOrm()
-	sql := "INSERT INTO design.student(name,sex,age,phone,address,duty,isonly,status) VALUES(?,?,?,?,?,?,?)"
-	values := []interface{}{student.Name, student.Sex, student.Age, student.Phone, student.Address, student.Duty, student.Isonly, common.DefStatus}
+	sql := "INSERT INTO design.student(name,sex,class,studentid,avatar,age,phone,address,duty,idonly,status) VALUES(?,?,?,?,?,?,?)"
+	values := []interface{}{student.Name, student.Sex, student.Class, student.StudentID, Avatar, student.Age, student.Phone, student.Address, student.Duty, student.Isonly, common.DefStatus}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
 	if err != nil {
@@ -75,8 +82,8 @@ func (sp *StudentServiceProvider) Insert(student Student) error {
 // ModifyStudent -
 func (sp *StudentServiceProvider) ModifyStudent(student Info) error {
 	o := orm.NewOrm()
-	sql := "UPDATE design.student SET phone=?,address=?,duty=? WHERE id=? AND status=? LIMIT 1"
-	values := []interface{}{student.Phone, student.Address, student.Duty, student.ID, common.DefStatus}
+	sql := "UPDATE design.student SET name=?,sex=?,studentid=?,class=?,phone=? WHERE id=? AND status=? LIMIT 1"
+	values := []interface{}{student.Name, student.Sex, student.Studentid, student.Class, student.Phone, student.ID, common.DefStatus}
 	raw := o.Raw(sql, values)
 	result, err := raw.Exec()
 	if err == nil {

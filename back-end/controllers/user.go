@@ -48,8 +48,9 @@ func (this *UserController) Login() {
 	var (
 		login struct {
 			Name  string `json:"name"`
-			Class string `json:"specialities"`
+			Class string `json:"className"`
 			Pass  string `json:"pass"`
+			Role  string `json:"role"`
 		}
 	)
 
@@ -60,7 +61,7 @@ func (this *UserController) Login() {
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
 		fmt.Println("fgg", login)
-		flag, class, err := models.UserServer.Login(login.Name, login.Class, login.Pass)
+		flag, class, err := models.UserServer.Login(login.Name, login.Class, login.Pass, login.Role)
 		if err != nil {
 			if err == orm.ErrNoRows {
 				logger.Logger.Error("noadmin：", err)

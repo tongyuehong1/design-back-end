@@ -51,13 +51,13 @@ func (sp *UserServiceProvider) Register(user User) error {
 }
 
 // Login -
-func (sp *UserServiceProvider) Login(name string, class string, pass string) (bool, string, error) {
+func (sp *UserServiceProvider) Login(name string, class string, pass string,role string) (bool, string, error) {
 	o := orm.NewOrm()
 	var (
 		info User
 	)
 
-	err := o.Raw("SELECT * FROM design.user WHERE name=? AND class=? LIMIT 1 LOCK IN SHARE MODE", name, class).QueryRow(&info)
+	err := o.Raw("SELECT * FROM design.user WHERE name=? AND class=? AND role=? LIMIT 1 LOCK IN SHARE MODE", name, class,role).QueryRow(&info)
 	if err != nil {
 		return false, "", err
 	} else if !utility.CompareHash([]byte(info.PassWord), pass) {
