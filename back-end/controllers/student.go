@@ -27,16 +27,29 @@ type StudentController struct {
 type User struct {
 	Id uint32 `json:"id"`
 }
+
+type Info struct {
+	Class string `json:"class"`
+	File  string `json:"name"`
+}
 // Insert -
 func (this *StudentController) Insert() {
 	var (
 		stu models.Student
-		user User
+		info Info
 	)
-	filename := utility.File + string(user.Id) + "." + utility.Filesuffix
+
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
+	if err != nil {
+		logger.Logger.Error("add student Unmarshal:", err)
+		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+		this.ServeJSON()
+	}
+
+	filename, err := utility.SaveFile(info.Class, info.File)
 	xlsx, err := excelize.OpenFile(filename)
 	if err != nil {
-		logger.Logger.Error("open excel error: ", err)
+		logger.Logger.Error("open student excel error: ", err)
 	}
 
 	rows := xlsx.GetRows("Sheet1")
@@ -173,7 +186,7 @@ func (this *StudentController) UpAvatar() {
 	if err != nil {
 		logger.Logger.Error("avatar Unmarshal:", err)
 	} else {
-		path, err := utility.SaveAvatar(avatar.StuID, avatar.Avatar, 0)
+		path, err := utility.SaveAvatar(avatar.StuID, avatar.Avatar)
 		if err != nil {
 			logger.Logger.Error("save avatar", err)
 		}

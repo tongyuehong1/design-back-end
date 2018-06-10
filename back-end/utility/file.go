@@ -18,31 +18,42 @@ const (
 	avasuffix = "jpg"
 	File = "./file"
 	Filesuffix = "xlsx"
+	Grade = "./grade"
 )
 
-func fileName(userID uint32, diff int) string {
-	//timestamp := time.Now().Unix()
+// SaveGrade -
+func SaveGrade(class,subject string, file string) (string,error) {
+	 filename := class + subject + File
+	 grade, _ := base64.StdEncoding.DecodeString(file)
+	 err := ioutil.WriteFile(filename, []byte(grade),0777)
+	 if err != nil {
+	 	return "", err
+	 }
 
-	//time := time.Unix(timestamp, 0).Format("2006-01-02 03:04:05 PM")
-	//time = strings.Replace(time, " ", "", 2)
-	id := strconv.FormatUint(uint64(userID), 10)
+	 return filename, nil
+}
 
-	if diff == 0 {
-		return avatar + id + "." + avasuffix
+func SaveFile(class,file string) (string, error) {
+	filename := class + File
+	info, _ := base64.StdEncoding.DecodeString(file)
+	err := ioutil.WriteFile(filename, []byte(info),0777)
+	if err != nil {
+		return "", err
 	}
 
-	return file + id + "." + filesuffix
+	return filename, nil
 }
 
 // SaveFile -
-func SaveAvatar(userID uint32, image string, diff int) (string, error) {
-	fileName := fileName(userID, diff)
+func SaveAvatar(userid uint32,image string) (string, error) {
+	id := strconv.FormatUint(uint64(userid), 10)
+	filename := id + image + avasuffix
 
 	img, _ := base64.StdEncoding.DecodeString(image)
-	err := ioutil.WriteFile(fileName, []byte(img), 0777)
+	err := ioutil.WriteFile(filename, []byte(img), 0777)
 	if err != nil {
 		logger.Error(err)
 	}
 
-	return fileName, err
+	return filename, err
 }

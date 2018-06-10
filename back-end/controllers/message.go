@@ -25,7 +25,7 @@ func (this *MessageController) Publish() {
 	message := models.Message{}
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &message)
 	if err != nil {
-		logger.Logger.Error("add student Unmarshal:", err)
+		logger.Logger.Error("add message Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
 		err := models.MessageServer.Publish(message)
