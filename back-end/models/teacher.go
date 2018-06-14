@@ -17,12 +17,12 @@ func init() {
 
 // Teacher -
 type Teacher struct {
-	ID    int8   `orm:"column(id);pk"    json:"id"`
-	Name  string `orm:"column(name)"  json:"name"`
-	Class string `orm:"column(class)" json:"class"`
-	Sex   string `orm:"column(sex)"   json:"sex"`
-	Phone string `orm:"column(phone)" json:"phone"`
-	Age   int8   `orm:"column(age)"   json:"age"`
+	ID     uint8   `orm:"column(id);pk"    json:"id"`
+	Name   string `orm:"column(name)"  json:"name"`
+	Class  string `orm:"column(class)" json:"className"`
+	Sex    string `orm:"column(sex)"   json:"gender"`
+	Phone  string `orm:"column(phone)" json:"phone"`
+	Office string   `orm:"column(office)"   json:"office"`
 }
 
 // TeacherServiceProvider -
@@ -35,8 +35,8 @@ var TeacherServer *TeacherServiceProvider
 // AddTeacher -
 func (sp *TeacherServiceProvider) AddTeacher(teacher Teacher) error {
 	o := orm.NewOrm()
-	sql := "INSERT INTO design.teacher(name,class,sex,phone,age) VALUES(?,?,?,?,?)"
-	values := []interface{}{teacher.Name, teacher.Class, teacher.Sex, teacher.Phone, teacher.Age}
+	sql := "INSERT INTO design.teacher(name,class,sex,phone,office) VALUES(?,?,?,?,?)"
+	values := []interface{}{teacher.Name, teacher.Class, teacher.Sex, teacher.Phone, teacher.Office}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
 	if err != nil {
@@ -48,8 +48,8 @@ func (sp *TeacherServiceProvider) AddTeacher(teacher Teacher) error {
 // ChangeTeacher -
 func (sp *TeacherServiceProvider) ChangeTeacher(teacher Teacher) error {
 	o := orm.NewOrm()
-	sql := "UPDATE design.student SET design.teacher(name,class,sex,phone,age) WHERE id=?LIMIT 1"
-	values := []interface{}{teacher.Name, teacher.Class, teacher.Sex, teacher.Phone, teacher.Age}
+	sql := "UPDATE design.teacher SET name=?,sex=?,phone=?,office=? WHERE class= ? LIMIT 1"
+	values := []interface{}{teacher.Name, teacher.Sex, teacher.Phone, teacher.Office,teacher.Class}
 	raw := o.Raw(sql, values)
 	result, err := raw.Exec()
 	if err == nil {
@@ -61,8 +61,8 @@ func (sp *TeacherServiceProvider) ChangeTeacher(teacher Teacher) error {
 }
 
 // GetOne -
-func (sp *TeacherServiceProvider) GetOne(class string) (*Teacher, error) {
-	var teacher Teacher
+func (sp *TeacherServiceProvider) GetOne(class string) (*[]Teacher, error) {
+	var teacher []Teacher
 	o := orm.NewOrm()
 	_, err := o.Raw("SELECT * FROM design.teacher WHERE class= ?", class).QueryRows(&teacher)
 	if err != nil {

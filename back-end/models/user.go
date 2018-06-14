@@ -18,9 +18,9 @@ func init() {
 // User -
 type User struct {
 	ID       int8   `orm:"column(id);pk"         json:"id"`
-	Name     string `orm:"column(name)"       json:"name"`
+	Name     string `orm:"column(name)"       json:"userName"`
 	Role     string `orm:"column(role)"       json:"role"`
-	Class    string `orm:"column(class)"      json:"class"`
+	Class    string `orm:"column(class)"      json:"classroom"`
 	PassWord string `orm:"column(password)"   json:"password"`
 }
 

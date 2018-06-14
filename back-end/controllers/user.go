@@ -7,11 +7,10 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-
-	"fmt"
 
 	"github.com/tongyuehong1/design-back-end/back-end/common"
 	"github.com/tongyuehong1/design-back-end/back-end/models"
@@ -23,20 +22,29 @@ type UserController struct {
 	beego.Controller
 }
 
+var InvalidObjectId = errors.New("invalid input to ObjectIdHex: ")
+
 // Register -
 func (this *UserController) Register() {
 	user := models.User{}
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &user)
+
 	if err != nil {
 		logger.Logger.Error("register Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		err := models.UserServer.Register(user)
-		if err != nil {
-			logger.Logger.Error("register", err)
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		if user.Class == "" || user.Name ==""|| user.PassWord== "" {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+			logger.Logger.Error("complete the information", InvalidObjectId)
+			this.ServeJSON()
 		} else {
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+			err := models.UserServer.Register(user)
+			if err != nil {
+				logger.Logger.Error("register", err)
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+			} else {
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+			}
 		}
 	}
 
@@ -54,13 +62,11 @@ func (this *UserController) Login() {
 		}
 	)
 
-	fmt.Println(string(this.Ctx.Input.RequestBody))
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &login)
 	if err != nil {
 		logger.Logger.Error("login Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		fmt.Println("fgg", login)
 		flag, class, err := models.UserServer.Login(login.Name, login.Class, login.Pass, login.Role)
 		if err != nil {
 			if err == orm.ErrNoRows {

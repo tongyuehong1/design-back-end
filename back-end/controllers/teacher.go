@@ -13,6 +13,7 @@ import (
 	"github.com/tongyuehong1/design-back-end/back-end/common"
 	"github.com/tongyuehong1/design-back-end/back-end/models"
 	"github.com/tongyuehong1/golang-project/libs/logger"
+	"fmt"
 )
 
 // TeacherController -
@@ -44,6 +45,7 @@ func (this *TeacherController) AddTeacher() {
 func (this *TeacherController) ChangeTech() {
 	teacher := models.Teacher{}
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &teacher)
+	fmt.Println("1111", teacher)
 	if err != nil {
 		logger.Logger.Error("change teacher's info Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
@@ -63,7 +65,7 @@ func (this *TeacherController) ChangeTech() {
 // GetTeacher -
 func (this *TeacherController) GetTeacher() {
 	var class struct {
-		Class string `json:"class"`
+		Class string `json:"className"`
 	}
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
 	if err != nil {

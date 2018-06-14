@@ -15,7 +15,7 @@ func init() {
 
 // Grade -
 type Grade struct {
-	ID      int8   `json:"id"`
+	ID      int8   `orm:"column(id);pk"        json:"id"`
 	Name    string `json:"name"`
 	Class   string `json:"class"`
 	Subject string `json:"subject"`
@@ -27,6 +27,7 @@ type GradeServiceProvider struct {
 }
 
 var GradeServer *GradeServiceProvider
+
 // Insert -
 func (sp *GradeServiceProvider) Insert(grade Grade) error {
 	o := orm.NewOrm()

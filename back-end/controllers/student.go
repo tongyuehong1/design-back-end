@@ -8,7 +8,6 @@ package controllers
 import (
 	"encoding/json"
 	"strings"
-	"fmt"
 
 	"github.com/astaxie/beego"
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -17,6 +16,7 @@ import (
 	"github.com/tongyuehong1/design-back-end/back-end/models"
 	"github.com/tongyuehong1/design-back-end/back-end/utility"
 	"github.com/tongyuehong1/golang-project/libs/logger"
+	"fmt"
 )
 
 // StudentController -
@@ -64,9 +64,7 @@ func (this *StudentController) Insert() {
 			stu.Duty = row[6]
 			stu.Isonly = row[7]
 			stu.Address = row[8]
-			fmt.Println(stu)
 		}
-		fmt.Println(stu)
 		err = models.StudentServer.Insert(stu)
 		if err != nil {
 			logger.Logger.Error("insert student error:", err)
@@ -103,7 +101,7 @@ func (this *StudentController) Modify() {
 func (this *StudentController) GetLeaders() {
 	var (
 		class struct {
-			Class string `json:"class"`
+			Class string `json:"className"`
 		}
 	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
@@ -130,12 +128,12 @@ func (this *StudentController) GetAll() {
 			Class string `json:"className"`
 		}
 	)
+
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
 	if err != nil {
 		logger.Logger.Error("change student info Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		fmt.Println("sssss", class.Class)
 		students, err := models.StudentServer.GetAll(class.Class)
 		if err != nil {
 			logger.Logger.Error("change student info", err)
@@ -177,7 +175,7 @@ func (this *StudentController) GetOne() {
 func (this *StudentController) UpAvatar() {
 	var (
 		avatar struct {
-			StuID  uint32 `json:"stuid"`
+			Name  string `json:"name"`
 			Avatar string `json:"avatar"`
 		}
 	)
@@ -186,18 +184,22 @@ func (this *StudentController) UpAvatar() {
 	if err != nil {
 		logger.Logger.Error("avatar Unmarshal:", err)
 	} else {
-		path, err := utility.SaveAvatar(avatar.StuID, avatar.Avatar)
+		fmt.Println("1111", avatar.Name)
+		path, err := utility.SaveAvatar(avatar.Name, avatar.Avatar)
 		if err != nil {
 			logger.Logger.Error("save avatar", err)
-		}
-		ip := "http://192.168.0.103:8080"
-		path = strings.Replace(path, ".", ip, 1)
-		err = models.StudentServer.UpAvatar(avatar.StuID, path)
-		if err != nil {
-			logger.Logger.Error("models", err)
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlNotFound}
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrNotFound}
 		} else {
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+			ip := "http://10.0.0.43:21001"
+			path = strings.Replace(path, ".", ip, 1)
+			fmt.Println("ssss", path)
+			err = models.StudentServer.UpAvatar(avatar.Name, path)
+			if err != nil {
+				logger.Logger.Error("models", err)
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlNotFound}
+			} else {
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: path}
+			}
 		}
 	}
 

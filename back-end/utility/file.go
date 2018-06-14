@@ -8,14 +8,13 @@ package utility
 import (
 	"encoding/base64"
 	"io/ioutil"
-	"strconv"
 
 	"github.com/fengyfei/gu/libs/logger"
 )
 
 const (
-	avatar    = "./avatar"
-	avasuffix = "jpg"
+	avatar    = "./avatar/"
+	avasuffix = ".jpg"
 	File = "./file"
 	Filesuffix = "xlsx"
 	Grade = "./grade"
@@ -45,9 +44,9 @@ func SaveFile(class,file string) (string, error) {
 }
 
 // SaveFile -
-func SaveAvatar(userid uint32,image string) (string, error) {
-	id := strconv.FormatUint(uint64(userid), 10)
-	filename := id + image + avasuffix
+func SaveAvatar(name,image string) (string, error) {
+	//id := strconv.FormatUint(uint64(userid), 10)
+	filename := avatar + name + avasuffix
 
 	img, _ := base64.StdEncoding.DecodeString(image)
 	err := ioutil.WriteFile(filename, []byte(img), 0777)

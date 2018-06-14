@@ -10,7 +10,6 @@ import (
 	"github.com/astaxie/beego/orm"
 
 	"github.com/tongyuehong1/design-back-end/back-end/common"
-	"github.com/360EntSecGroup-Skylar/excelize"
 	"fmt"
 )
 
@@ -45,10 +44,7 @@ type (
 	}
 )
 
-const (
-	Avatar = "http://10.0.0.43:8080/avatar/common.png"
-)
-
+var Avatar string
 // StudentServiceProvider -
 type StudentServiceProvider struct {
 }
@@ -70,6 +66,11 @@ func createTable() {
 func (sp *StudentServiceProvider) Insert(student Student) error {
 	o := orm.NewOrm()
 	sql := "INSERT INTO design.student(name,sex,class,studentid,avatar,age,phone,address,duty,idonly,status) VALUES(?,?,?,?,?,?,?)"
+	if student.Sex == "女" {
+		Avatar = "http://10.0.0.43:21001/avatar/girl.jpg"
+	} else {
+		Avatar = "http://10.0.0.43:21001/avatar/common.jpg"
+	}
 	values := []interface{}{student.Name, student.Sex, student.Class, student.StudentID, Avatar, student.Age, student.Phone, student.Address, student.Duty, student.Isonly, common.DefStatus}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
@@ -131,10 +132,11 @@ func (sp *StudentServiceProvider) GetOne(name, class string) (*Student, error) {
 }
 
 // UpAvatar -
-func (sp *StudentServiceProvider) UpAvatar(id uint32, path string) error {
+func (sp *StudentServiceProvider) UpAvatar(name, path string) error {
 	o := orm.NewOrm()
-	sql := "UPDATE design.student SET avatar=? WHERE id=? AND status=? LIMIT 1"
-	values := []interface{}{path, id, common.DefStatus}
+	fmt.Println("aaa", name)
+	sql := "UPDATE design.student SET avatar=? WHERE name=? AND status=? LIMIT 1"
+	values := []interface{}{path, name, common.DefStatus}
 	raw := o.Raw(sql, values)
 	result, err := raw.Exec()
 	if err == nil {
