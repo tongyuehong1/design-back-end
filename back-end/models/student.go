@@ -134,15 +134,15 @@ func (sp *StudentServiceProvider) GetOne(name, class string) (*Student, error) {
 // UpAvatar -
 func (sp *StudentServiceProvider) UpAvatar(name, path string) error {
 	o := orm.NewOrm()
-	fmt.Println("aaa", name)
+	fmt.Println("aaa--->", name, "path-->", path)
 	sql := "UPDATE design.student SET avatar=? WHERE name=? AND status=? LIMIT 1"
 	values := []interface{}{path, name, common.DefStatus}
 	raw := o.Raw(sql, values)
-	result, err := raw.Exec()
-	if err == nil {
-		if row, _ := result.RowsAffected(); row == 0 {
-			return common.ErrNotFound
-		}
-	}
+	_, err := raw.Exec()
+	//if err == nil {
+	//	if row, _ := result.RowsAffected(); row == 0 {
+	//		return common.ErrNotFound
+	//	}
+	//}
 	return err
 }

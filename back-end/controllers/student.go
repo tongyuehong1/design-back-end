@@ -16,7 +16,6 @@ import (
 	"github.com/tongyuehong1/design-back-end/back-end/models"
 	"github.com/tongyuehong1/design-back-end/back-end/utility"
 	"github.com/tongyuehong1/golang-project/libs/logger"
-	"fmt"
 )
 
 // StudentController -
@@ -184,7 +183,6 @@ func (this *StudentController) UpAvatar() {
 	if err != nil {
 		logger.Logger.Error("avatar Unmarshal:", err)
 	} else {
-		fmt.Println("1111", avatar.Name)
 		path, err := utility.SaveAvatar(avatar.Name, avatar.Avatar)
 		if err != nil {
 			logger.Logger.Error("save avatar", err)
@@ -192,7 +190,6 @@ func (this *StudentController) UpAvatar() {
 		} else {
 			ip := "http://10.0.0.43:21001"
 			path = strings.Replace(path, ".", ip, 1)
-			fmt.Println("ssss", path)
 			err = models.StudentServer.UpAvatar(avatar.Name, path)
 			if err != nil {
 				logger.Logger.Error("models", err)

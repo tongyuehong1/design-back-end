@@ -16,8 +16,8 @@ func init() {
 
 // Message -
 type Message struct {
-	ID      int32  `orm:"column(id);pk"        json:"id"`
-	Class   string `orm:"column(class)"     json:"class"`
+	ID      int32  `orm:"column(id);pk"     json:"id"`
+	Class   string `orm:"column(class)"     json:"className"`
 	Title   string `orm:"column(title)"     json:"title"`
 	Content string `orm:"column(content)"   json:"content"`
 	Status  string `orm:"column(status)"    json:"status"`

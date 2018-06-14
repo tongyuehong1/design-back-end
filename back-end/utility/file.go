@@ -45,7 +45,6 @@ func SaveFile(class,file string) (string, error) {
 
 // SaveFile -
 func SaveAvatar(name,image string) (string, error) {
-	//id := strconv.FormatUint(uint64(userid), 10)
 	filename := avatar + name + avasuffix
 
 	img, _ := base64.StdEncoding.DecodeString(image)

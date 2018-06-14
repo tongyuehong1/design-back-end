@@ -13,6 +13,7 @@ import (
 	"github.com/tongyuehong1/design-back-end/back-end/common"
 	"github.com/tongyuehong1/design-back-end/back-end/models"
 	"github.com/tongyuehong1/golang-project/libs/logger"
+	"fmt"
 )
 
 // MessageController -
@@ -24,16 +25,23 @@ type MessageController struct {
 func (this *MessageController) Publish() {
 	message := models.Message{}
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &message)
+	fmt.Println("222", message)
 	if err != nil {
 		logger.Logger.Error("add message Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		err := models.MessageServer.Publish(message)
-		if err != nil {
+		fmt.Println("aaaaa", message.Class)
+		if message.Class ==""|| message.Title== "" || message.Content == "" {
 			logger.Logger.Error("Insert message", err)
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 		} else {
-			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+			err := models.MessageServer.Publish(message)
+			if err != nil {
+				logger.Logger.Error("Insert message", err)
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+			} else {
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+			}
 		}
 	}
 
@@ -66,7 +74,7 @@ func (this *MessageController) Delete() {
 // Show -
 func (this *MessageController) Show() {
 	var class struct {
-		Class string `json:"class"`
+		Class string `json:"className"`
 	}
 
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)
