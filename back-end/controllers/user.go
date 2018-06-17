@@ -43,6 +43,11 @@ func (this *UserController) Register() {
 				logger.Logger.Error("register", err)
 				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
 			} else {
+				err := models.TeacherServer.AddTeacher(user.Name, user.Class)
+				if err != nil {
+					logger.Logger.Error("add teacher", err)
+					this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+				}
 				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 			}
 		}

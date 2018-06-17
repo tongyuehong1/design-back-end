@@ -139,10 +139,5 @@ func (sp *StudentServiceProvider) UpAvatar(name, path string) error {
 	values := []interface{}{path, name, common.DefStatus}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
-	//if err == nil {
-	//	if row, _ := result.RowsAffected(); row == 0 {
-	//		return common.ErrNotFound
-	//	}
-	//}
 	return err
 }

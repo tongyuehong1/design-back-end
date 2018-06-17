@@ -16,9 +16,10 @@ func init() {
 	beego.Router("/student/getone", &controllers.StudentController{}, "post:GetOne")
 	beego.Router("/student/upavatar", &controllers.StudentController{}, "post:UpAvatar")
 
-	beego.Router("/teacher/add", &controllers.TeacherController{}, "Post:AddTeacher")
 	beego.Router("/teacher/change", &controllers.TeacherController{}, "Post:ChangeTech")
 	beego.Router("/teacher/get", &controllers.TeacherController{}, "Post:GetTeacher")
+	beego.Router("/teacher/upavatar", &controllers.StudentController{}, "post:TechAvatar")
+
 
 	beego.Router("/message/publish", &controllers.MessageController{}, "Post:Publish")
 	beego.Router("/message/show", &controllers.MessageController{}, "Post:Show")
