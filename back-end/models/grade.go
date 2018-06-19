@@ -7,6 +7,7 @@ package models
 
 import (
 	"github.com/astaxie/beego/orm"
+	"fmt"
 )
 
 func init() {
@@ -41,10 +42,11 @@ func (sp *GradeServiceProvider) Insert(grade Grade) error {
 	return nil
 }
 
-func (sp *GradeServiceProvider) GetOne(class string, name string) (*Grade, error) {
-	var grade Grade
+func (sp *GradeServiceProvider) GetOne(class string, name string) (*[]Grade, error) {
+	var grade []Grade
 	o := orm.NewOrm()
 	_, err := o.Raw("SELECT * FROM design.grade WHERE name=? AND class=?", name, class).QueryRows(&grade)
+	fmt.Println("7777", grade)
 	if err != nil {
 		return nil, err
 	}

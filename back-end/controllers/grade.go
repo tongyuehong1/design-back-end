@@ -9,12 +9,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/astaxie/beego"
 
 	"github.com/tongyuehong1/design-back-end/back-end/common"
 	"github.com/tongyuehong1/design-back-end/back-end/models"
-	"github.com/tongyuehong1/design-back-end/back-end/utility"
 	"github.com/tongyuehong1/golang-project/libs/logger"
 )
 
@@ -32,57 +30,41 @@ type GradeFile struct {
 func (this *GradeController) AddGrade() {
 	var (
 		grade models.Grade
-		info  GradeFile
 	)
 
-	err := json.Unmarshal(this.Ctx.Input.RequestBody, &info)
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &grade)
+	fmt.Println("2222", grade)
 	if err != nil {
-		logger.Logger.Error("add grade Unmarshal:", err)
+		logger.Logger.Error("change student info Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
-		this.ServeJSON()
-	}
-
-	filename, err := utility.SaveGrade(info.Class, info.Subject, info.Grade)
-	xlsx, err := excelize.OpenFile(filename)
-	if err != nil {
-		logger.Logger.Error("open grade excel error: ", err)
-	}
-
-	rows := xlsx.GetRows("Sheet1")
-	for i, row := range rows {
-		if i != 0 {
-			grade.Name = row[1]
-			grade.Class = row[0]
-			grade.Subject = row[2]
-			grade.Grade = row[3]
-			fmt.Println(grade)
-		}
-		err = models.GradeServer.Insert(grade)
+	} else {
+		err := models.GradeServer.Insert(grade)
 		if err != nil {
-			logger.Logger.Error("insert student error:", err)
+			logger.Logger.Error("change student info", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		} else {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 		}
 	}
-
-	this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 
 	this.ServeJSON()
 }
 
 // GetOne -
-func GetOne(this *GradeController) {
+func (this *GradeController) GetOne() {
 	var (
 		student struct {
 			Name  string `json:"name"`
-			Class string `json:"class"`
+			Class string `json:"className"`
 		}
 	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &student)
+	fmt.Println("rrrrr", student)
 	if err != nil {
 		logger.Logger.Error("get one's grade Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
 	} else {
-		grade, err := models.GradeServer.GetOne(student.Name, student.Class)
+		grade, err := models.GradeServer.GetOne(student.Class, student.Name)
 		if err != nil {
 			logger.Logger.Error("get one's grade model", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
@@ -94,10 +76,10 @@ func GetOne(this *GradeController) {
 	this.ServeJSON()
 }
 
-func GetAll(this *GradeController) {
+func (this *GradeController) GetAll() {
 	var (
 		class struct {
-			Class string `json:"class"`
+			Class string `json:"className"`
 		}
 	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &class)

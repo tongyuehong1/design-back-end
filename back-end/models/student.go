@@ -6,7 +6,6 @@
 package models
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 
 	"github.com/tongyuehong1/design-back-end/back-end/common"
@@ -37,10 +36,10 @@ type (
 	Info struct {
 		ID        uint32 `json:"id"`
 		Name      string `json:"name"`
-		Sex       string `json:"sex"`
-		Class     string `json:"class"`
+		Class     string `json:"className"`
 		Studentid string `json:"studentid"`
 		Phone     string `json:"phone"`
+		Address   string `json:"address"`
 	}
 )
 
@@ -52,24 +51,14 @@ type StudentServiceProvider struct {
 // StudentServer -
 var StudentServer *StudentServiceProvider
 
-func createTable() {
-	name := "student"
-	force := true
-	verbose := true
-	err := orm.RunSyncdb(name, force, verbose)
-	if err != nil {
-		beego.Error(err)
-	}
-}
-
 // Insert -
 func (sp *StudentServiceProvider) Insert(student Student) error {
 	o := orm.NewOrm()
-	sql := "INSERT INTO design.student(name,sex,class,studentid,avatar,age,phone,address,duty,idonly,status) VALUES(?,?,?,?,?,?,?)"
+	sql := "INSERT INTO design.student(name,sex,class,studentid,avatar,age,phone,address,duty,isonly,status) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 	if student.Sex == "女" {
-		Avatar = "http://10.0.0.43:21001/avatar/girl.jpg"
+		Avatar = "http://192.168.43.218:21001/avatar/girl.jpg"
 	} else {
-		Avatar = "http://10.0.0.43:21001/avatar/common.jpg"
+		Avatar = "http://192.168.43.218:21001/avatar/common.jpg"
 	}
 	values := []interface{}{student.Name, student.Sex, student.Class, student.StudentID, Avatar, student.Age, student.Phone, student.Address, student.Duty, student.Isonly, common.DefStatus}
 	raw := o.Raw(sql, values)
@@ -83,8 +72,8 @@ func (sp *StudentServiceProvider) Insert(student Student) error {
 // ModifyStudent -
 func (sp *StudentServiceProvider) ModifyStudent(student Info) error {
 	o := orm.NewOrm()
-	sql := "UPDATE design.student SET name=?,sex=?,studentid=?,class=?,phone=? WHERE id=? AND status=? LIMIT 1"
-	values := []interface{}{student.Name, student.Sex, student.Studentid, student.Class, student.Phone, student.ID, common.DefStatus}
+	sql := "UPDATE design.student SET name=?,studentid=?,phone=?,address=? WHERE name=? AND status=? AND class=? LIMIT 1"
+	values := []interface{}{student.Name,student.Studentid, student.Phone,student.Address, student.Name, common.DefStatus, student.Class}
 	raw := o.Raw(sql, values)
 	result, err := raw.Exec()
 	if err == nil {
@@ -99,7 +88,7 @@ func (sp *StudentServiceProvider) ModifyStudent(student Info) error {
 func (sp *StudentServiceProvider) GetLeaders(classes string) ([]Student, error) {
 	var student []Student
 	o := orm.NewOrm()
-	_, err := o.Raw("SELECT * FROM design.student WHERE class=? AND duty!=? AND status=?", classes, "", common.DefStatus).QueryRows(&student)
+	_, err := o.Raw("SELECT * FROM design.student WHERE class=? AND duty!=? AND status=?", classes, "无", common.DefStatus).QueryRows(&student)
 	if err != nil {
 		return nil, err
 	}
@@ -120,8 +109,8 @@ func (sp *StudentServiceProvider) GetAll(classes string) ([]Student, error) {
 }
 
 // GetOne -
-func (sp *StudentServiceProvider) GetOne(name, class string) (*Student, error) {
-	var student Student
+func (sp *StudentServiceProvider) GetOne(name, class string) (*[]Student, error) {
+	var student []Student
 	o := orm.NewOrm()
 	_, err := o.Raw("SELECT * FROM design.student WHERE name=? AND class=?", name, class).QueryRows(&student)
 	if err != nil {
@@ -132,11 +121,21 @@ func (sp *StudentServiceProvider) GetOne(name, class string) (*Student, error) {
 }
 
 // UpAvatar -
-func (sp *StudentServiceProvider) UpAvatar(name, path string) error {
+func (sp *StudentServiceProvider) UpAvatar(name, path,class string) error {
 	o := orm.NewOrm()
 	fmt.Println("aaa--->", name, "path-->", path)
-	sql := "UPDATE design.student SET avatar=? WHERE name=? AND status=? LIMIT 1"
-	values := []interface{}{path, name, common.DefStatus}
+	sql := "UPDATE design.student SET avatar=? WHERE name=? AND status=? AND class=? LIMIT 1"
+	values := []interface{}{path, name, common.DefStatus,class}
+	raw := o.Raw(sql, values)
+	_, err := raw.Exec()
+	return err
+}
+
+// UpAvatar -
+func (sp *StudentServiceProvider) Delete(name, class string) error {
+	o := orm.NewOrm()
+	sql := "UPDATE design.student SET status=? WHERE name=? AND class=? LIMIT 1"
+	values := []interface{}{0, name, class}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
 	return err

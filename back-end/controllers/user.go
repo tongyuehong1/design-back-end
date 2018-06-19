@@ -15,6 +15,7 @@ import (
 	"github.com/tongyuehong1/design-back-end/back-end/common"
 	"github.com/tongyuehong1/design-back-end/back-end/models"
 	"github.com/tongyuehong1/golang-project/libs/logger"
+	"fmt"
 )
 
 // UserController -
@@ -43,12 +44,16 @@ func (this *UserController) Register() {
 				logger.Logger.Error("register", err)
 				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
 			} else {
-				err := models.TeacherServer.AddTeacher(user.Name, user.Class)
-				if err != nil {
-					logger.Logger.Error("add teacher", err)
+				if user.Role == "teacher" {
+					err := models.TeacherServer.AddTeacher(user.Name, user.Class)
+					if err != nil {
+						logger.Logger.Error("add teacher", err)
+						this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+					}
+					this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+				} else {
 					this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 				}
-				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 			}
 		}
 	}
@@ -91,5 +96,44 @@ func (this *UserController) Login() {
 			}
 		}
 	}
+	this.ServeJSON()
+}
+
+// Drop -
+func (this *StudentController) Drop() {
+	var (
+		user struct {
+			Name  string `json:"name"`
+			Class string `json:"className"`
+		}
+	)
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &user)
+	fmt.Println("aaaa", user)
+	if err != nil {
+		logger.Logger.Error("delete user info Unmarshal:", err)
+		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+	} else {
+		err := models.UserServer.Drop(user.Name, user.Class)
+		if err != nil {
+			logger.Logger.Error("delete user info", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		} else {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+		}
+	}
+
+	this.ServeJSON()
+}
+
+// classes -
+func (this *UserController) Classes() {
+		class, err := models.UserServer.GetClasses()
+		if err != nil {
+			logger.Logger.Error("get class", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		} else {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: class}
+		}
+
 	this.ServeJSON()
 }

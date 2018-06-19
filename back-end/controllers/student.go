@@ -16,6 +16,7 @@ import (
 	"github.com/tongyuehong1/design-back-end/back-end/models"
 	"github.com/tongyuehong1/design-back-end/back-end/utility"
 	"github.com/tongyuehong1/golang-project/libs/logger"
+	"fmt"
 )
 
 // StudentController -
@@ -30,6 +31,52 @@ type User struct {
 type Info struct {
 	Class string `json:"class"`
 	File  string `json:"name"`
+}
+
+type student struct {
+		Class     string `orm:"column(class)"     json:"className"`
+		Name      string `orm:"column(name)"      json:"name"`
+		StudentID string `orm:"column(studentid)" json:"studentid"`
+		Sex       string `orm:"column(sex)"       json:"sex"`
+		Age       string `orm:"column(age)"       json:"age"`
+		Phone     string `orm:"column(phone)"     json:"phone"`
+		Address   string `orm:"column(address)"   json:"address"`
+		Duty      string `orm:"column(duty)"      json:"duty"`
+	}
+
+
+// Add -
+func (this *StudentController) Add() {
+	var stu student
+	var one models.Student
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &stu)
+	fmt.Println("1111", stu)
+	if err != nil {
+		logger.Logger.Error("add student info Unmarshal:", err)
+		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+	} else {
+		if stu.Sex == ""|| stu.Age== ""||stu.Duty==""||stu.Class==""||stu.Phone==""||stu.Address==""||stu.StudentID=="" ||stu.Phone=="" {
+			logger.Logger.Error("add student info Unmarshal:", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+		}
+		one.Name = stu.Name
+		one.Sex = stu.Sex
+		one.Class = stu.Class
+		one.Phone = stu.Phone
+		one.Address = stu.Address
+		one.StudentID = stu.StudentID
+		one.Duty = stu.Duty
+		one.Age = stu.Age
+		err := models.StudentServer.Insert(one)
+		if err != nil {
+			logger.Logger.Error("add student info", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		} else {
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
+		}
+	}
+
+	this.ServeJSON()
 }
 // Insert -
 func (this *StudentController) Insert() {
@@ -150,10 +197,11 @@ func (this *StudentController) GetOne() {
 	var (
 		student struct {
 			Name  string `json:"name"`
-			Class string `json:"class"`
+			Class string `json:"className"`
 		}
 	)
 	err := json.Unmarshal(this.Ctx.Input.RequestBody, &student)
+	fmt.Println("aaaa", student)
 	if err != nil {
 		logger.Logger.Error("change student info Unmarshal:", err)
 		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
@@ -176,6 +224,7 @@ func (this *StudentController) UpAvatar() {
 		avatar struct {
 			Name  string `json:"name"`
 			Avatar string `json:"avatar"`
+			Class  string `json:"className"`
 		}
 	)
 
@@ -188,15 +237,46 @@ func (this *StudentController) UpAvatar() {
 			logger.Logger.Error("save avatar", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrNotFound}
 		} else {
-			ip := "http://10.0.0.43:21001"
+			ip := "http://192.168.43.218:21001"
 			path = strings.Replace(path, ".", ip, 1)
-			err = models.StudentServer.UpAvatar(avatar.Name, path)
+			err = models.StudentServer.UpAvatar(avatar.Name, path,avatar.Class)
 			if err != nil {
 				logger.Logger.Error("models", err)
 				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlNotFound}
 			} else {
 				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed, common.RespKeyData: path}
 			}
+		}
+	}
+
+	this.ServeJSON()
+}
+
+// Delete
+func (this *StudentController) Delete() {
+	var (
+		student struct {
+			Name  string `json:"name"`
+			Class string `json:"className"`
+		}
+	)
+	err := json.Unmarshal(this.Ctx.Input.RequestBody, &student)
+	fmt.Println("aaaa", student)
+	if err != nil {
+		logger.Logger.Error("delete student info Unmarshal:", err)
+		this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrInvalidParam}
+	} else {
+		err := models.StudentServer.Delete(student.Name, student.Class)
+		if err != nil {
+			logger.Logger.Error("delete student info", err)
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+		} else {
+			err := models.UserServer.Drop(student.Name, student.Class)
+			if err != nil {
+				logger.Logger.Error("delete user info", err)
+				this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrMysqlQuery}
+			}
+			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrSucceed}
 		}
 	}
 

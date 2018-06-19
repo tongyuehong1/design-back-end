@@ -8,7 +8,6 @@ package models
 import (
 	"github.com/astaxie/beego/orm"
 
-	"github.com/tongyuehong1/design-back-end/back-end/common"
 	"fmt"
 )
 
@@ -18,13 +17,13 @@ func init() {
 
 // Teacher -
 type Teacher struct {
-	ID     uint8   `orm:"column(id);pk"    json:"id"`
+	ID     uint8  `orm:"column(id);pk"    json:"id"`
 	Name   string `orm:"column(name)"  json:"name"`
 	Class  string `orm:"column(class)" json:"className"`
 	Avatar string `orm:"column(avatar)" json:"avatar"`
 	Sex    string `orm:"column(sex)"   json:"gender"`
 	Phone  string `orm:"column(phone)" json:"phone"`
-	Office string   `orm:"column(office)"   json:"office"`
+	Office string `orm:"column(office)"   json:"office"`
 }
 
 // TeacherServiceProvider -
@@ -33,12 +32,13 @@ type TeacherServiceProvider struct {
 
 // TeacherServer -
 var TeacherServer *TeacherServiceProvider
+
 const (
 	TAvatar = "http://10.0.0.43:21001/avatar/teacher.jpg"
 )
 
 // AddTeacher -
-func (sp *TeacherServiceProvider) AddTeacher(name,class string) error {
+func (sp *TeacherServiceProvider) AddTeacher(name, class string) error {
 	o := orm.NewOrm()
 	sql := "INSERT INTO design.teacher(name,class,avatar) VALUES(?,?,?)"
 	values := []interface{}{name, class, TAvatar}
@@ -55,7 +55,7 @@ func (sp *TeacherServiceProvider) ChangeTeacher(teacher Teacher) error {
 	o := orm.NewOrm()
 	fmt.Println("111111", teacher)
 	sql := "UPDATE design.teacher SET name=?,sex=?,phone=?,office=? WHERE class= ? LIMIT 1"
-	values := []interface{}{teacher.Name, teacher.Sex, teacher.Phone, teacher.Office,teacher.Class}
+	values := []interface{}{teacher.Name, teacher.Sex, teacher.Phone, teacher.Office, teacher.Class}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
 
@@ -77,8 +77,8 @@ func (sp *TeacherServiceProvider) GetOne(class string) (*[]Teacher, error) {
 // UpAvatar -
 func (sp *TeacherServiceProvider) TechAvatar(name, path string) error {
 	o := orm.NewOrm()
-	sql := "UPDATE design.teacher SET avatar=? WHERE name=? AND status=? LIMIT 1"
-	values := []interface{}{path, name, common.DefStatus}
+	sql := "UPDATE design.teacher SET avatar=? WHERE name=? LIMIT 1"
+	values := []interface{}{path, name}
 	raw := o.Raw(sql, values)
 	_, err := raw.Exec()
 	return err

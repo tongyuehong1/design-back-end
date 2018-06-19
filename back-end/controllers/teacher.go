@@ -89,7 +89,7 @@ func (this *StudentController) TechAvatar() {
 			logger.Logger.Error("save avatar", err)
 			this.Data["json"] = map[string]interface{}{common.RespKeyStatus: common.ErrNotFound}
 		} else {
-			ip := "http://10.0.0.43:21001"
+			ip := "http://192.168.43.218:21001"
 			path = strings.Replace(path, ".", ip, 1)
 			err = models.TeacherServer.TechAvatar(avatar.Name, path)
 			if err != nil {

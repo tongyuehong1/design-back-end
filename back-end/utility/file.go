@@ -9,7 +9,7 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 
-	"github.com/fengyfei/gu/libs/logger"
+	"github.com/tongyuehong1/design-back-end/back-end/libs"
 )
 
 const (
@@ -50,7 +50,7 @@ func SaveAvatar(name,image string) (string, error) {
 	img, _ := base64.StdEncoding.DecodeString(image)
 	err := ioutil.WriteFile(filename, []byte(img), 0777)
 	if err != nil {
-		logger.Error(err)
+		logger.Logger.Error("WriteFile:",err)
 	}
 
 	return filename, err
